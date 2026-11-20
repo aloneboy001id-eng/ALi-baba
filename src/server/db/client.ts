@@ -3,19 +3,26 @@ import "server-only";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
-import { getServerEnv } from "@/lib/config/env";
+import { getDatabaseUrl, getServerEnv } from "@/lib/config/env";
 
 import * as schema from "./schema";
 
-// Keep local public routes usable without a database, while production still
-// fails fast when its required server configuration is missing.
-const serverEnv = process.env.NODE_ENV === "production" ? getServerEnv() : null;
-const databaseUrl = serverEnv?.DATABASE_URL ?? process.env.DATABASE_URL;
+function createDatabase() {
+  const serverEnv = process.env.NODE_ENV === "production" ? getServerEnv() : null;
+  const databaseUrl = serverEnv?.DATABASE_URL ?? getDatabaseUrl();
 
-const connection = postgres(databaseUrl ?? "postgres://localhost/unused", {
-  max: process.env.NODE_ENV === "production" ? 10 : 1,
-  prepare: false,
-});
+  const connection = postgres(databaseUrl, {
+    max: process.env.NODE_ENV === "production" ? 10 : 1,
+    prepare: false,
+  });
 
-export const db = drizzle(connection, { schema });
-export type Database = typeof db;
+  return drizzle(connection, { schema });
+}
+
+let database: ReturnType<typeof createDatabase> | undefined;
+
+// Defer validation and connection setup until a database-backed operation runs.
+export function getDatabase() {
+  database ??= createDatabase();
+  return database;
+}

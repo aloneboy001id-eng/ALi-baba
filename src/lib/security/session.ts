@@ -5,7 +5,8 @@ import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 
-import { db } from "@/server/db/client";
+import { getDatabase } from "@/server/db/client";
+import { isDatabaseConfigured } from "@/lib/config/env";
 import { sessions, users } from "@/server/db/schema";
 
 const sessionCookieName = "ali_baba_session";
@@ -31,6 +32,7 @@ export function getSessionCookieOptions() {
 }
 
 export async function createSession(userId: string): Promise<string> {
+  const db = getDatabase();
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + sessionLifetimeSeconds * 1000);
 
@@ -47,7 +49,9 @@ export async function createSession(userId: string): Promise<string> {
 
 export async function getCurrentUser() {
   const token = await getSessionToken();
-  if (!token) return null;
+  if (!token || !isDatabaseConfigured()) return null;
+
+  const db = getDatabase();
 
   const [result] = await db
     .select({ id: users.id, email: users.email, role: users.role })
@@ -61,7 +65,8 @@ export async function getCurrentUser() {
 
 export async function destroySession(): Promise<void> {
   const token = await getSessionToken();
-  if (token) {
+  if (token && isDatabaseConfigured()) {
+    const db = getDatabase();
     await db.delete(sessions).where(eq(sessions.tokenHash, hashSessionToken(token)));
   }
 

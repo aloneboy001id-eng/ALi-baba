@@ -3,9 +3,10 @@ import "server-only";
 import { z } from "zod";
 
 const serverEnvSchema = z.object({
-  DATABASE_URL: z.string().min(1),
-  AUTH_SESSION_SECRET: z.string().min(32),
-  NEXT_PUBLIC_APP_URL: z.string().url(),
+  // Public demo pages can render at build time without a database connection.
+  DATABASE_URL: z.string().min(1).optional(),
+  AUTH_SESSION_SECRET: z.string().min(32).optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().default(process.env.URL ?? "http://localhost:3000"),
   WHATSAPP_PROVIDER_URL: z.string().url().optional().or(z.literal("")),
   WHATSAPP_PROVIDER_TOKEN: z.string().optional().or(z.literal("")),
   PHONE_NOTIFICATION_PROVIDER_URL: z.string().url().optional().or(z.literal("")),
@@ -22,6 +23,10 @@ export function getDatabaseUrl(): string {
   }
 
   return value;
+}
+
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL);
 }
 
 export function getServerEnv() {
