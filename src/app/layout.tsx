@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isDatabaseConfigured } from "@/lib/config/env";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const databaseConfigured = isDatabaseConfigured();
+
   return (
     <html lang="en">
       <body>
@@ -26,6 +29,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </a>
           </nav>
         </header>
+        <p className="demo-banner" role="status">
+          Sample storefront: menu and order screens use example content.
+          {!databaseConfigured && " Staff access is unavailable until a database is connected."}
+        </p>
         {children}
         <footer className="footer">
           <div className="footer-inner">

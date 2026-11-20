@@ -92,6 +92,15 @@ button {
 .nav a:hover {
   color: var(--red);
 }
+.demo-banner {
+  background: #fff0c2;
+  border-bottom: 1px solid var(--line);
+  color: #4f4030;
+  font-size: 13px;
+  margin: 0;
+  padding: 10px 16px;
+  text-align: center;
+}
 .order-button,
 .button-primary {
   background: var(--red);

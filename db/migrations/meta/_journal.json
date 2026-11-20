@@ -8,6 +8,13 @@
       "when": 1793923200000,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795169790811,
+      "tag": "0001_confused_rachel_grey",
+      "breakpoints": true
     }
   ]
 }
